@@ -1,5 +1,10 @@
 package com.thealgorithms.shared
 
+enum class HighlightReason {
+    COMPARING, SWAPPING, PIVOTING, SELECTING, PROBING,
+    FOUND, RANGE, OVERWRITING, SORTED
+}
+
 sealed interface AlgorithmEvent {
     data class Start(val data: List<Int>) : AlgorithmEvent
     data class Compare(val indices: Pair<Int, Int>) : AlgorithmEvent

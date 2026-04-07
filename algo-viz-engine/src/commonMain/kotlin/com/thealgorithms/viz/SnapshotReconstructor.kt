@@ -1,15 +1,18 @@
 package com.thealgorithms.viz
 
 import com.thealgorithms.shared.AlgorithmEvent
+import com.thealgorithms.shared.HighlightReason
 
 class SnapshotReconstructor {
     fun reconstruct(snapshot: AlgorithmSnapshot, events: List<AlgorithmEvent>): AlgorithmSnapshot {
         var state = snapshot.arrayState.toMutableList()
         var comparisons = snapshot.comparisons
         var swaps = snapshot.swaps
-        var highlighted = snapshot.highlightedIndices
+        var highlights = snapshot.highlights.toMutableMap()
+        var sortedIndices = snapshot.sortedIndices.toMutableSet()
 
         for (event in events) {
+            highlights.clear()
             when (event) {
                 is AlgorithmEvent.Swap -> {
                     val (i, j) = event.indices
@@ -17,34 +20,42 @@ class SnapshotReconstructor {
                     state[i] = state[j]
                     state[j] = temp
                     swaps++
-                    highlighted = setOf(i, j)
+                    highlights[i] = HighlightReason.SWAPPING
+                    highlights[j] = HighlightReason.SWAPPING
                 }
                 is AlgorithmEvent.Overwrite -> {
                     state[event.index] = event.newValue
-                    highlighted = setOf(event.index)
+                    highlights[event.index] = HighlightReason.OVERWRITING
                 }
                 is AlgorithmEvent.Compare -> {
                     comparisons++
-                    highlighted = setOf(event.indices.first, event.indices.second)
+                    highlights[event.indices.first] = HighlightReason.COMPARING
+                    highlights[event.indices.second] = HighlightReason.COMPARING
                 }
-                is AlgorithmEvent.Select -> highlighted = setOf(event.index)
-                is AlgorithmEvent.Deselect -> highlighted = emptySet()
-                is AlgorithmEvent.Pivot -> highlighted = setOf(event.index)
-                is AlgorithmEvent.Probe -> highlighted = setOf(event.index)
-                is AlgorithmEvent.Found -> highlighted = setOf(event.index)
-                is AlgorithmEvent.RangeCheck -> highlighted = (event.low..event.high).toSet()
+                is AlgorithmEvent.Select -> highlights[event.index] = HighlightReason.SELECTING
+                is AlgorithmEvent.Deselect -> highlights.clear()
+                is AlgorithmEvent.Pivot -> highlights[event.index] = HighlightReason.PIVOTING
+                is AlgorithmEvent.Probe -> highlights[event.index] = HighlightReason.PROBING
+                is AlgorithmEvent.Found -> highlights[event.index] = HighlightReason.FOUND
+                is AlgorithmEvent.RangeCheck -> {
+                    for (idx in event.low..event.high) {
+                        highlights[idx] = HighlightReason.RANGE
+                    }
+                }
                 is AlgorithmEvent.Start -> {
                     state = event.data.toMutableList()
-                    highlighted = emptySet()
+                    highlights.clear()
+                    sortedIndices.clear()
                 }
                 is AlgorithmEvent.Complete -> {
                     state = event.result.toMutableList()
-                    highlighted = emptySet()
+                    highlights.clear()
+                    sortedIndices = state.indices.toMutableSet()
                 }
-                is AlgorithmEvent.NotFound -> highlighted = emptySet()
+                is AlgorithmEvent.NotFound -> highlights.clear()
             }
         }
 
-        return AlgorithmSnapshot(state.toList(), highlighted, comparisons, swaps)
+        return AlgorithmSnapshot(state.toList(), highlights.toMap(), comparisons, swaps, sortedIndices)
     }
 }

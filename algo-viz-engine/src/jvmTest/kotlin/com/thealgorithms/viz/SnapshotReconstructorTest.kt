@@ -1,8 +1,10 @@
 package com.thealgorithms.viz
 
 import com.thealgorithms.shared.AlgorithmEvent
+import com.thealgorithms.shared.HighlightReason
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.maps.shouldContainExactly
 
 class SnapshotReconstructorTest : StringSpec({
     val reconstructor = SnapshotReconstructor()
@@ -18,6 +20,7 @@ class SnapshotReconstructorTest : StringSpec({
 
         result.arrayState shouldBe listOf(2, 1, 3)
         result.highlightedIndices shouldBe setOf(0, 2)
+        result.highlights shouldContainExactly mapOf(0 to HighlightReason.SWAPPING, 2 to HighlightReason.SWAPPING)
         result.swaps shouldBe 1
     }
 
@@ -36,6 +39,7 @@ class SnapshotReconstructorTest : StringSpec({
         result.comparisons shouldBe 2
         result.swaps shouldBe 1
         result.highlightedIndices shouldBe setOf(1, 2)
+        result.highlights shouldContainExactly mapOf(1 to HighlightReason.COMPARING, 2 to HighlightReason.COMPARING)
     }
 
     "reconstruct from Overwrite events" {
@@ -50,17 +54,18 @@ class SnapshotReconstructorTest : StringSpec({
 
         result.arrayState shouldBe listOf(10, 20, 30)
         result.highlightedIndices shouldBe setOf(2)
+        result.highlights shouldContainExactly mapOf(2 to HighlightReason.OVERWRITING)
     }
 
     "empty events list returns same snapshot" {
-        val snapshot = AlgorithmSnapshot(listOf(1, 2, 3), setOf(0), 5, 2)
+        val snapshot = AlgorithmSnapshot(listOf(1, 2, 3), mapOf(0 to HighlightReason.COMPARING), 5, 2)
 
         val result = reconstructor.reconstruct(snapshot, emptyList())
 
         result shouldBe snapshot
     }
 
-    "reconstruct Complete event sets final state" {
+    "reconstruct Complete event sets final state and marks all sorted" {
         val base = AlgorithmSnapshot(listOf(1, 2, 3))
         val events = listOf(
             AlgorithmEvent.Complete(listOf(1, 2, 3)),
@@ -70,6 +75,7 @@ class SnapshotReconstructorTest : StringSpec({
 
         result.arrayState shouldBe listOf(1, 2, 3)
         result.highlightedIndices shouldBe emptySet()
+        result.sortedIndices shouldBe setOf(0, 1, 2)
     }
 
     "reconstruct handles Select and Deselect" {
@@ -96,6 +102,7 @@ class SnapshotReconstructorTest : StringSpec({
         result.arrayState shouldBe listOf(2, 5, 1, 8)
         result.swaps shouldBe 2
         result.highlightedIndices shouldBe setOf(2, 3)
+        result.highlights shouldContainExactly mapOf(2 to HighlightReason.SWAPPING, 3 to HighlightReason.SWAPPING)
     }
 
     "reconstruct Probe and Found events for search" {
@@ -109,6 +116,33 @@ class SnapshotReconstructorTest : StringSpec({
         val result = reconstructor.reconstruct(base, events)
 
         result.highlightedIndices shouldBe setOf(1)
+        result.highlights shouldContainExactly mapOf(1 to HighlightReason.FOUND)
         result.arrayState shouldBe listOf(10, 20, 30, 40)
+    }
+
+    "reconstruct Pivot event" {
+        val base = AlgorithmSnapshot(listOf(3, 1, 4, 1, 5))
+        val events = listOf(
+            AlgorithmEvent.Pivot(2),
+        )
+
+        val result = reconstructor.reconstruct(base, events)
+
+        result.highlights shouldContainExactly mapOf(2 to HighlightReason.PIVOTING)
+    }
+
+    "reconstruct RangeCheck event" {
+        val base = AlgorithmSnapshot(listOf(10, 20, 30, 40, 50))
+        val events = listOf(
+            AlgorithmEvent.RangeCheck(1, 3),
+        )
+
+        val result = reconstructor.reconstruct(base, events)
+
+        result.highlights shouldContainExactly mapOf(
+            1 to HighlightReason.RANGE,
+            2 to HighlightReason.RANGE,
+            3 to HighlightReason.RANGE
+        )
     }
 })

@@ -46,8 +46,10 @@ fun AppContent(
         Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
             StatsPanel(
                 algorithmName = selectedAlgo?.name ?: "Select an algorithm",
+                algorithmDescription = selectedAlgo?.description,
                 snapshot = snapshot,
                 playbackState = playbackState,
+                progress = viewModel.progress.collectAsState().value,
                 modifier = Modifier.fillMaxWidth()
             )
 
