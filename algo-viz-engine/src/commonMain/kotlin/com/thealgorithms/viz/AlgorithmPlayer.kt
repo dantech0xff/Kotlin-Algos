@@ -28,7 +28,6 @@ internal class RecordingEmitter(
     )
 ) : MutableSharedFlow<AlgorithmEvent> by delegate {
 
-    @Volatile
     private var _recordedSnapshot: List<AlgorithmEvent> = emptyList()
 
     val recorded: List<AlgorithmEvent> get() = _recordedSnapshot

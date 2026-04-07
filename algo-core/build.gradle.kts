@@ -8,6 +8,7 @@ version = "1.0.0"
 kotlin {
     jvmToolchain(20)
     jvm()
+    wasmJs { browser() }
     sourceSets {
         commonMain.dependencies {
             implementation(project(":algo-shared"))
