@@ -17,4 +17,6 @@ rootProject.name = "kotlin-algos"
 include("algo-shared")
 include("algo-core")
 include("algo-viz-engine")
+include("algo-ui-shared")
+include("algo-ui-web")
 include("algo-ui-desktop")

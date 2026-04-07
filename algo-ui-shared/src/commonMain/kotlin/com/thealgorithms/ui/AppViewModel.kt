@@ -8,6 +8,7 @@ import com.thealgorithms.shared.VisualizableAlgorithm
 import com.thealgorithms.ui.model.AlgorithmCategory
 import com.thealgorithms.ui.model.AlgorithmInfo
 import com.thealgorithms.ui.model.AlgorithmRegistry
+import com.thealgorithms.ui.model.VizKey
 import com.thealgorithms.viz.AlgorithmPlayer
 import com.thealgorithms.viz.AlgorithmSnapshot
 import kotlinx.coroutines.CoroutineScope
@@ -24,7 +25,7 @@ import kotlinx.coroutines.launch
 
 class AppViewModel {
     private val player = AlgorithmPlayer()
-    private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+    private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 
     val playbackState: StateFlow<PlaybackState> = player.state
     val snapshot: StateFlow<AlgorithmSnapshot> = player.currentSnapshot
@@ -90,6 +91,18 @@ class AppViewModel {
     fun stop() = player.stop()
     fun stepForward() = player.stepForward()
     fun stepBack() = player.stepBack()
+
+    fun onKey(key: VizKey) {
+        when (key) {
+            VizKey.PLAY_PAUSE -> {
+                val state = playbackState.value
+                if (state is PlaybackState.Playing) pause() else play()
+            }
+            VizKey.STEP_FORWARD -> stepForward()
+            VizKey.STEP_BACK -> stepBack()
+            VizKey.RESET -> stop()
+        }
+    }
 
     fun destroy() = player.destroy()
 }

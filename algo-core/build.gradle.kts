@@ -1,6 +1,5 @@
 plugins {
-    alias(libs.plugins.kotlin.jvm)
-    `java-library`
+    alias(libs.plugins.kotlin.multiplatform)
 }
 
 group = "com.thealgorithms"
@@ -8,15 +7,21 @@ version = "1.0.0"
 
 kotlin {
     jvmToolchain(20)
-}
-
-dependencies {
-    implementation(project(":algo-shared"))
-    api(libs.kotlin.stdlib)
-    testImplementation(libs.kotest.runner)
-    testImplementation(libs.kotest.assertions)
-    testImplementation(libs.coroutines.core)
-    testImplementation(libs.coroutines.test)
+    jvm()
+    sourceSets {
+        commonMain.dependencies {
+            implementation(project(":algo-shared"))
+        }
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+        }
+        jvmTest.dependencies {
+            implementation(libs.kotest.runner)
+            implementation(libs.kotest.assertions)
+            implementation(libs.coroutines.core)
+            implementation(libs.coroutines.test)
+        }
+    }
 }
 
 tasks.withType<Test>().configureEach {

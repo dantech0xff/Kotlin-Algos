@@ -11,15 +11,6 @@ import com.thealgorithms.core.sorts.SelectionSortVisualizer
 import com.thealgorithms.shared.SearchVisualizableAlgorithm
 import com.thealgorithms.shared.VisualizableAlgorithm
 
-enum class AlgorithmCategory { SORTING, SEARCHING }
-
-data class AlgorithmInfo(
-    val name: String,
-    val category: AlgorithmCategory,
-    val description: String,
-    val visualizer: Any
-)
-
 object AlgorithmRegistry {
     val algorithms = listOf(
         AlgorithmInfo("Bubble Sort", AlgorithmCategory.SORTING, "O(n\u00B2) \u2013 Compares adjacent elements", BubbleSortVisualizer()),

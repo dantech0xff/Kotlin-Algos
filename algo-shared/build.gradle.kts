@@ -1,6 +1,5 @@
 plugins {
-    alias(libs.plugins.kotlin.jvm)
-    `java-library`
+    alias(libs.plugins.kotlin.multiplatform)
 }
 
 group = "com.thealgorithms"
@@ -8,8 +7,10 @@ version = "1.0.0"
 
 kotlin {
     jvmToolchain(20)
-}
-
-dependencies {
-    api(libs.coroutines.core)
+    jvm()
+    sourceSets {
+        commonMain.dependencies {
+            api(libs.coroutines.core)
+        }
+    }
 }

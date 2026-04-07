@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.compose)
 }
 
 group = "com.thealgorithms"
@@ -12,19 +13,12 @@ kotlin {
         commonMain.dependencies {
             implementation(project(":algo-shared"))
             implementation(project(":algo-core"))
+            implementation(project(":algo-viz-engine"))
+            implementation(compose.material3)
+            implementation(compose.foundation)
+            implementation(compose.ui)
+            implementation(compose.materialIconsExtended)
             implementation(libs.coroutines.core)
         }
-        commonTest.dependencies {
-            implementation(kotlin("test"))
-        }
-        jvmTest.dependencies {
-            implementation(libs.kotest.runner)
-            implementation(libs.kotest.assertions)
-            implementation(libs.coroutines.test)
-        }
     }
-}
-
-tasks.withType<Test>().configureEach {
-    useJUnitPlatform()
 }

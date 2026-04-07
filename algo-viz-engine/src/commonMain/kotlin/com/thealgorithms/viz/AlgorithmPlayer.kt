@@ -28,12 +28,13 @@ internal class RecordingEmitter(
     )
 ) : MutableSharedFlow<AlgorithmEvent> by delegate {
 
-    private val _recorded = mutableListOf<AlgorithmEvent>()
+    @Volatile
+    private var _recordedSnapshot: List<AlgorithmEvent> = emptyList()
 
-    val recorded: List<AlgorithmEvent> get() = _recorded.toList()
+    val recorded: List<AlgorithmEvent> get() = _recordedSnapshot
 
     override suspend fun emit(value: AlgorithmEvent) {
-        synchronized(_recorded) { _recorded.add(value) }
+        _recordedSnapshot = _recordedSnapshot + value
         delegate.emit(value)
     }
 }
