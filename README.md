@@ -16,5 +16,32 @@ These implementations are intended for learning purposes. As such, they may be l
 ## Contribution Guidelines
 Please read our [Contribution Guidelines](CONTRIBUTING.md) before you contribute to this project.
 
+## Kotlin Algorithm Visualizer
+
+A Compose Desktop application that visualizes sorting and search algorithms step-by-step.
+
+### Quick Start
+```bash
+./gradlew :algo-ui-desktop:run
+```
+
+### Module Structure
+| Module | Purpose |
+|--------|---------|
+| `algo-shared` | Interfaces, events, playback state |
+| `algo-core` | Algorithm implementations + extensions |
+| `algo-viz-engine` | Visualization engine (player, snapshots, playback) |
+| `algo-ui-desktop` | Compose Desktop app |
+
+### MVP Algorithms
+**Sorting:** BubbleSort, SelectionSort, InsertionSort, QuickSort, MergeSort
+**Search:** LinearSearch, IterativeBinarySearch, RecursiveBinarySearch
+
+### Features
+- Step-by-step visualization with playback controls
+- Speed control (10ms - 2000ms per step)
+- Keyboard shortcuts (Space=play/pause, Left/Right=step, R=reset)
+- Stats panel showing comparisons and swaps
+
 ## Algorithms
 Our [directory](DIRECTORY.md) has the full list of applications.
