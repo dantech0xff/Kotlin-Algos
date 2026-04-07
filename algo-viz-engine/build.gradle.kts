@@ -6,7 +6,7 @@ group = "com.thealgorithms"
 version = "1.0.0"
 
 kotlin {
-    jvmToolchain(20)
+    jvmToolchain(21)
     jvm()
     wasmJs { browser() }
     sourceSets {
