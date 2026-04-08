@@ -36,12 +36,13 @@ class CompareViewModel {
     private val _isPlaying = MutableStateFlow(false)
     val isPlaying: StateFlow<Boolean> = _isPlaying.asStateFlow()
 
-    private val _isRunning = MutableStateFlow(false)
-    val isRunning: StateFlow<Boolean> = _isRunning.asStateFlow()
+    private val _isReady = MutableStateFlow(false)
+    val isReady: StateFlow<Boolean> = _isReady.asStateFlow()
 
     fun selectAlgorithms(algorithms: List<AlgorithmInfo>) {
         require(algorithms.size == 4) { "Must select exactly 4 algorithms" }
         _selectedAlgorithms.value = algorithms
+        _isReady.value = false
         refreshSlots()
     }
 
@@ -54,8 +55,9 @@ class CompareViewModel {
     }
 
     /**
-     * Run all 4 algorithms sequentially, updating slots after each one.
-     * Mirrors AppViewModel.runAlgorithm() which works on WASM.
+     * Run all 4 algorithms and immediately play the first step.
+     * Uses scope.launch to avoid blocking UI — each player.run() is fast
+     * (just populates buffer synchronously, no actual delays).
      */
     fun runAll() {
         val algorithms = _selectedAlgorithms.value
@@ -63,29 +65,28 @@ class CompareViewModel {
         val input = _inputArray.value
 
         stop()
-        _isRunning.value = true
+        _isReady.value = false
 
         scope.launch {
-            try {
-                // Run sequentially — same pattern as AppViewModel
-                for (i in 0..3) {
-                    players[i].run(
-                        AlgorithmRegistry.visualizerAsSort(algorithms[i]),
-                        input
-                    )
-                    // Update after each so user sees progress
-                    refreshSlots()
-                }
-            } finally {
-                _isRunning.value = false
-                refreshSlots()
+            // Run all 4 — each player.run() executes the sort synchronously
+            // and populates the event buffer. This is fast (< 100ms total).
+            for (i in 0..3) {
+                players[i].run(
+                    AlgorithmRegistry.visualizerAsSort(algorithms[i]),
+                    input
+                )
             }
+
+            // Step all to index 0 so bars appear
+            players.forEach { it.stepForward() }
+
+            _isReady.value = true
+            refreshSlots()
         }
     }
 
     fun play() {
-        val anyHasEvents = players.any { it.totalEvents.value > 0 }
-        if (!anyHasEvents) return
+        if (!_isReady.value) return
         if (players.all { it.state.value is PlaybackState.Complete }) return
 
         _isPlaying.value = true
@@ -93,10 +94,8 @@ class CompareViewModel {
         playbackJob = scope.launch {
             while (true) {
                 var anyAdvanced = false
-                for (i in players.indices) {
-                    val player = players[i]
-                    if (player.totalEvents.value == 0) continue
-                    if (player.state.value !is PlaybackState.Complete) {
+                for (player in players) {
+                    if (player.totalEvents.value > 0 && player.state.value !is PlaybackState.Complete) {
                         player.stepForward()
                         anyAdvanced = true
                     }
@@ -120,10 +119,12 @@ class CompareViewModel {
         playbackJob?.cancel()
         _isPlaying.value = false
         players.forEach { it.stop() }
+        _isReady.value = false
         refreshSlots()
     }
 
     fun stepForward() {
+        if (!_isReady.value) return
         playbackJob?.cancel()
         _isPlaying.value = false
         for (player in players) {
@@ -135,6 +136,7 @@ class CompareViewModel {
     }
 
     fun stepBack() {
+        if (!_isReady.value) return
         playbackJob?.cancel()
         _isPlaying.value = false
         players.forEach { it.stepBack() }
@@ -157,7 +159,6 @@ class CompareViewModel {
             val index = player.currentEventIndex.value
             val playerState = player.state.value
 
-            // Derive effective state: Complete if player says so OR manually stepped to end
             val effectiveState = when {
                 playerState is PlaybackState.Complete -> playerState
                 total > 0 && index >= total - 1 -> PlaybackState.Complete(total)

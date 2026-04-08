@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Algorithm Visualizer — Kotlin/Wasm</title>
+    <!-- Preload critical resources -->
+    <link rel="preload" href="algo-viz.js" as="script">
     <style>
         html, body {
             margin: 0; padding: 0;
@@ -21,8 +23,9 @@
             z-index: 10;
             background: #1a1a2e;
         }
-        #loader h2 { color: #f8f8f2; margin: 0 0 12px 0; font-size: 20px; }
-        #loader p { color: #8888a8; margin: 0 0 20px 0; font-size: 13px; }
+        #loader h2 { color: #f8f8f2; margin: 0 0 8px 0; font-size: 20px; }
+        #loader .sub { color: #8888a8; margin: 0 0 20px 0; font-size: 13px; }
+        #loader .status { color: #6666a0; margin: 8px 0 0 0; font-size: 11px; min-height: 16px; }
         .spinner {
             width: 36px; height: 36px;
             border: 3px solid #33334a;
@@ -32,7 +35,7 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
         #progress-bar {
-            width: 200px; height: 3px;
+            width: 240px; height: 3px;
             background: #33334a; border-radius: 2px;
             margin-top: 16px; overflow: hidden;
         }
@@ -45,46 +48,76 @@
 </head>
 <body>
     <div id="loader">
-        <h2>Algorithm Visualizer</h2>
-        <p>Loading Kotlin/Wasm runtime...</p>
+        <h2>⚡ Algorithm Visualizer</h2>
+        <p class="sub">Loading Kotlin/Wasm runtime...</p>
         <div class="spinner"></div>
         <div id="progress-bar"><div id="progress-fill"></div></div>
+        <p class="status" id="status-text">Downloading engine...</p>
     </div>
     <canvas id="root"></canvas>
     <script>
-        // Show download progress for the main JS bundle
         const fill = document.getElementById('progress-fill');
         const loader = document.getElementById('loader');
+        const status = document.getElementById('status-text');
+        const totalSize = 13 * 1024 * 1024; // ~13MB total
+        let phase = 0; // 0=js, 1=skiko-wasm, 2=app-wasm
 
-        if (window.fetch) {
-            fetch('algo-viz.js')
-                .then(r => {
-                    const total = parseInt(r.headers.get('content-length') || '0');
-                    if (!total || !r.body) return r.text();
-                    let loaded = 0;
-                    const reader = r.body.getReader();
-                    return new Response(
-                        new ReadableStream({
-                            start(ctrl) {
-                                function pump() {
-                                    reader.read().then(({done, value}) => {
-                                        if (done) { ctrl.close(); return; }
-                                        loaded += value.length;
-                                        fill.style.width = Math.min(90, (loaded / total) * 90) + '%';
-                                        ctrl.enqueue(value);
-                                        pump();
-                                    });
-                                }
-                                pump();
-                            }
-                        })
-                    ).text();
-                })
-                .then(() => {
-                    fill.style.width = '100%';
-                    setTimeout(() => { loader.style.display = 'none'; }, 2000);
-                });
+        function updateProgress(loaded) {
+            const pct = Math.min(95, (loaded / totalSize) * 100);
+            fill.style.width = pct + '%';
         }
+
+        // Track resource loading via PerformanceObserver
+        if (window.PerformanceObserver) {
+            const observer = new PerformanceObserver((list) => {
+                for (const entry of list.getEntries()) {
+                    if (entry.name.includes('skiko') || entry.name.includes('8bc1b')) {
+                        status.textContent = 'Loading Skia rendering engine...';
+                        phase = 1;
+                    } else if (entry.name.includes('85058') || entry.name.includes('kotlin-algos')) {
+                        status.textContent = 'Loading app module...';
+                        phase = 2;
+                    }
+                }
+            });
+            observer.observe({ type: 'resource', buffered: false });
+        }
+
+        // Track JS download progress
+        fetch('algo-viz.js')
+            .then(r => {
+                const total = parseInt(r.headers.get('content-length') || '0');
+                status.textContent = 'Downloading application...';
+                if (!total || !r.body) return r.text();
+                let loaded = 0;
+                const reader = r.body.getReader();
+                return new Response(
+                    new ReadableStream({
+                        start(ctrl) {
+                            function pump() {
+                                reader.read().then(({done, value}) => {
+                                    if (done) { ctrl.close(); return; }
+                                    loaded += value.length;
+                                    updateProgress(loaded);
+                                    ctrl.enqueue(value);
+                                    pump();
+                                });
+                            }
+                            pump();
+                        }
+                    })
+                ).text();
+            })
+            .then(() => {
+                status.textContent = 'Initializing Wasm modules...';
+                fill.style.width = '60%';
+                // Hide loader after wasm finishes initializing (2-3s)
+                setTimeout(() => {
+                    fill.style.width = '100%';
+                    status.textContent = 'Ready!';
+                    setTimeout(() => { loader.style.display = 'none'; }, 300);
+                }, 3000);
+            });
     </script>
     <script src="algo-viz.js"></script>
 </body>
