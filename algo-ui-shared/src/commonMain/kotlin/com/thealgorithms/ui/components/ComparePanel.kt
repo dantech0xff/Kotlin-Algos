@@ -10,8 +10,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -33,25 +39,16 @@ fun ComparePanel(
     modifier: Modifier = Modifier
 ) {
     val slots by viewModel.slots.collectAsState()
-    val isPlaying by viewModel.isPlaying.collectAsState()
-    val isReady by viewModel.isReady.collectAsState()
     val speedMs by viewModel.speedMs.collectAsState()
     val inputArray by viewModel.inputArray.collectAsState()
+    val playbackState by viewModel.playbackState.collectAsState()
+    val error by viewModel.error.collectAsState()
 
-    // Derive progress from slots
     val minIndex = slots.minOfOrNull { it.eventIndex } ?: 0
     val maxTotal = slots.maxOfOrNull { it.totalEvents } ?: 0
     val progress = minIndex to maxTotal
 
-    val playbackState: PlaybackState = when {
-        isPlaying -> PlaybackState.Playing
-        slots.isNotEmpty() && slots.all { it.isComplete } -> PlaybackState.Complete(maxTotal)
-        isReady -> PlaybackState.Paused  // Events loaded & ready → Play enabled
-        else -> PlaybackState.Stopped
-    }
-
     Column(modifier = modifier.padding(8.dp)) {
-        // Top bar
         Row(
             modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -75,7 +72,32 @@ fun ComparePanel(
             }
         }
 
-        // 2x2 grid
+        if (error != null) {
+            Card(
+                modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)
+            ) {
+                Row(
+                    modifier = Modifier.padding(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = error!!,
+                        color = MaterialTheme.colorScheme.onErrorContainer,
+                        modifier = Modifier.weight(1f),
+                        fontSize = 12.sp
+                    )
+                    IconButton(onClick = { viewModel.clearError() }) {
+                        Icon(
+                            Icons.Default.Close,
+                            contentDescription = "Dismiss",
+                            tint = MaterialTheme.colorScheme.onErrorContainer
+                        )
+                    }
+                }
+            }
+        }
+
         Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
             Column(modifier = Modifier.fillMaxSize()) {
                 Row(modifier = Modifier.weight(1f).fillMaxWidth()) {
@@ -115,7 +137,6 @@ fun ComparePanel(
 
         Spacer(Modifier.height(4.dp))
 
-        // Shared playback controls
         PlaybackControls(
             playbackState = playbackState,
             progress = progress,
@@ -133,7 +154,6 @@ fun ComparePanel(
 
         Spacer(Modifier.height(4.dp))
 
-        // Shared input config
         InputConfigPanel(
             inputArray = inputArray,
             searchKey = 0,
