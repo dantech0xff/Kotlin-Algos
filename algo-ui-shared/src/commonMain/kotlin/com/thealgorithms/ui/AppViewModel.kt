@@ -91,6 +91,7 @@ class AppViewModel {
     fun stop() = player.stop()
     fun stepForward() = player.stepForward()
     fun stepBack() = player.stepBack()
+    fun seekTo(index: Int) = player.seekTo(index)
 
     fun onKey(key: VizKey) {
         when (key) {

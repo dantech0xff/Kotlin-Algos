@@ -1,5 +1,6 @@
 package com.thealgorithms.core.sorts
 
+import com.thealgorithms.core.utils.DescriptionUtils
 import com.thealgorithms.core.utils.isLessThan
 import com.thealgorithms.core.utils.swapAt
 import com.thealgorithms.shared.AlgorithmEvent
@@ -44,7 +45,10 @@ class QuickSortVisualizer : VisualizableAlgorithm {
         val arr = input.toMutableList()
         emitter.emit(AlgorithmEvent.Start(input))
         quickSort(arr, 0, arr.size - 1, emitter)
-        emitter.emit(AlgorithmEvent.Complete(arr.toList()))
+        emitter.emit(AlgorithmEvent.Complete(
+            result = arr.toList(),
+            description = "Quick sort complete! Array is now sorted."
+        ))
     }
 
     private suspend fun quickSort(
@@ -67,20 +71,38 @@ class QuickSortVisualizer : VisualizableAlgorithm {
         emitter: MutableSharedFlow<AlgorithmEvent>,
     ): Int {
         val pivot = arr[high]
-        emitter.emit(AlgorithmEvent.Pivot(high))
+        emitter.emit(AlgorithmEvent.Pivot(
+            index = high,
+            description = DescriptionUtils.pivot(high, arr),
+            pseudocodeLine = 3
+        ))
         var i = low - 1
         for (j in low until high) {
-            emitter.emit(AlgorithmEvent.Compare(j to high))
+            emitter.emit(AlgorithmEvent.Compare(
+                indices = j to high,
+                description = DescriptionUtils.compare(j, high, arr),
+                pseudocodeLine = 6
+            ))
             if (arr[j] <= pivot) {
                 i++
                 if (i != j) {
+                    val swapDesc = DescriptionUtils.swap(i, j, arr)
                     arr.swapAt(i, j)
-                    emitter.emit(AlgorithmEvent.Swap(i to j))
+                    emitter.emit(AlgorithmEvent.Swap(
+                        indices = i to j,
+                        description = swapDesc,
+                        pseudocodeLine = 8
+                    ))
                 }
             }
         }
+        val pivotSwapDesc = DescriptionUtils.swap(i + 1, high, arr)
         arr.swapAt(i + 1, high)
-        emitter.emit(AlgorithmEvent.Swap(i + 1 to high))
+        emitter.emit(AlgorithmEvent.Swap(
+            indices = i + 1 to high,
+            description = pivotSwapDesc,
+            pseudocodeLine = 9
+        ))
         return i + 1
     }
 }

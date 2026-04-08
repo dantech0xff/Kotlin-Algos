@@ -165,6 +165,15 @@ class AlgorithmPlayer(
         }
     }
 
+    fun seekTo(index: Int) {
+        playbackJob?.cancel()
+        if (buffer.size == 0) return
+        val clamped = index.coerceIn(0, buffer.size - 1)
+        _currentEventIndex.value = clamped
+        _currentSnapshot.value = reconstructToIndex(clamped)
+        _state.value = PlaybackState.Paused
+    }
+
     private fun reconstructToIndex(index: Int): AlgorithmSnapshot {
         if (buffer.size == 0) return AlgorithmSnapshot(emptyList())
 

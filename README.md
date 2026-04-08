@@ -42,6 +42,13 @@ A Compose Desktop application that visualizes sorting and search algorithms step
 - Speed control (10ms - 2000ms per step)
 - Keyboard shortcuts (Space=play/pause, Left/Right=step, R=reset)
 - Stats panel showing comparisons and swaps
+- Pseudocode panel with active-line highlighting synced to each step
+- Step-by-step explanations describing what's happening and why
+- Complexity info (best/avg/worst time, space, stability, difficulty)
+- Input presets (Random, Nearly Sorted, Reversed, All Equal, Many Duplicates)
+- Progress scrubber to seek to any event
+- Color legend explaining visual highlight meanings
+- Sidebar search filter to quickly find algorithms
 
 ## Algorithms
 Our [directory](DIRECTORY.md) has the full list of applications.

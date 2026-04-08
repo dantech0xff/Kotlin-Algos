@@ -1,5 +1,6 @@
 package com.thealgorithms.core.sorts
 
+import com.thealgorithms.core.utils.DescriptionUtils
 import com.thealgorithms.core.utils.isGreaterThan
 import com.thealgorithms.core.utils.swapAt
 import com.thealgorithms.shared.AlgorithmEvent
@@ -38,9 +39,17 @@ class ShellSortVisualizer : VisualizableAlgorithm {
             for (i in gap until arr.size) {
                 var j = i
                 while (j >= gap) {
-                    emitter.emit(AlgorithmEvent.Compare(j - gap to j))
+                    emitter.emit(AlgorithmEvent.Compare(
+                        indices = j - gap to j,
+                        description = DescriptionUtils.compare(j - gap, j, arr),
+                        pseudocodeLine = 7
+                    ))
                     if (arr[j - gap] > arr[j]) {
-                        emitter.emit(AlgorithmEvent.Swap(j - gap to j))
+                        emitter.emit(AlgorithmEvent.Swap(
+                            indices = j - gap to j,
+                            description = DescriptionUtils.swap(j - gap, j, arr),
+                            pseudocodeLine = 8
+                        ))
                         arr.swapAt(j, j - gap)
                         j -= gap
                     } else {
@@ -51,6 +60,9 @@ class ShellSortVisualizer : VisualizableAlgorithm {
             gap /= 2
         }
 
-        emitter.emit(AlgorithmEvent.Complete(arr.toList()))
+        emitter.emit(AlgorithmEvent.Complete(
+            result = arr.toList(),
+            description = "Shell sort complete! Array is now sorted."
+        ))
     }
 }

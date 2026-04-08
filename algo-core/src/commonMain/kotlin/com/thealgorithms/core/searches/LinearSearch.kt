@@ -20,9 +20,17 @@ class LinearSearchVisualizer : SearchVisualizableAlgorithm {
         emitter.emit(AlgorithmEvent.Start(input.array))
 
         for (i in input.array.indices) {
-            emitter.emit(AlgorithmEvent.Probe(i))
+            emitter.emit(AlgorithmEvent.Probe(
+                index = i,
+                description = "Checking arr[$i]=${input.array[i]}, looking for ${input.key}",
+                pseudocodeLine = 3
+            ))
             if (input.array[i] == input.key) {
-                emitter.emit(AlgorithmEvent.Found(i))
+                emitter.emit(AlgorithmEvent.Found(
+                    index = i,
+                    description = "Found target ${input.key} at index $i!",
+                    pseudocodeLine = 4
+                ))
                 return
             }
         }

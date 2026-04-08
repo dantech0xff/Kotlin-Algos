@@ -1,5 +1,6 @@
 package com.thealgorithms.core.sorts
 
+import com.thealgorithms.core.utils.DescriptionUtils
 import com.thealgorithms.shared.AlgorithmEvent
 import com.thealgorithms.shared.SortAlgorithm
 import com.thealgorithms.shared.VisualizableAlgorithm
@@ -47,7 +48,10 @@ class MergeSortVisualizer : VisualizableAlgorithm {
         val arr = input.toMutableList()
         emitter.emit(AlgorithmEvent.Start(input))
         mergeSort(arr, 0, arr.size - 1, emitter)
-        emitter.emit(AlgorithmEvent.Complete(arr.toList()))
+        emitter.emit(AlgorithmEvent.Complete(
+            result = arr.toList(),
+            description = "Merge sort complete! Array is now sorted."
+        ))
     }
 
     private suspend fun mergeSort(
@@ -77,26 +81,50 @@ class MergeSortVisualizer : VisualizableAlgorithm {
         var k = left
 
         while (i <= mid - left && j <= right - left) {
-            emitter.emit(AlgorithmEvent.Compare(left + i to left + j))
+            emitter.emit(AlgorithmEvent.Compare(
+                indices = left + i to left + j,
+                description = "Comparing left[${left + i}]=${temp[i]} with right[${left + j}]=${temp[j]}",
+                pseudocodeLine = 6
+            ))
             if (temp[i] <= temp[j]) {
                 arr[k] = temp[i]
-                emitter.emit(AlgorithmEvent.Overwrite(k, temp[i]))
+                emitter.emit(AlgorithmEvent.Overwrite(
+                    index = k,
+                    newValue = temp[i],
+                    description = DescriptionUtils.overwrite(k, temp[i]),
+                    pseudocodeLine = 6
+                ))
                 i++
             } else {
                 arr[k] = temp[j]
-                emitter.emit(AlgorithmEvent.Overwrite(k, temp[j]))
+                emitter.emit(AlgorithmEvent.Overwrite(
+                    index = k,
+                    newValue = temp[j],
+                    description = DescriptionUtils.overwrite(k, temp[j]),
+                    pseudocodeLine = 6
+                ))
                 j++
             }
             k++
         }
         while (i <= mid - left) {
             arr[k] = temp[i]
-            emitter.emit(AlgorithmEvent.Overwrite(k, temp[i]))
+            emitter.emit(AlgorithmEvent.Overwrite(
+                index = k,
+                newValue = temp[i],
+                description = DescriptionUtils.overwrite(k, temp[i]),
+                pseudocodeLine = 6
+            ))
             i++; k++
         }
         while (j <= right - left) {
             arr[k] = temp[j]
-            emitter.emit(AlgorithmEvent.Overwrite(k, temp[j]))
+            emitter.emit(AlgorithmEvent.Overwrite(
+                index = k,
+                newValue = temp[j],
+                description = DescriptionUtils.overwrite(k, temp[j]),
+                pseudocodeLine = 6
+            ))
             j++; k++
         }
     }

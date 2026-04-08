@@ -1,5 +1,6 @@
 package com.thealgorithms.core.sorts
 
+import com.thealgorithms.core.utils.DescriptionUtils
 import com.thealgorithms.core.utils.isGreaterThan
 import com.thealgorithms.core.utils.swapAt
 import com.thealgorithms.shared.AlgorithmEvent
@@ -59,10 +60,19 @@ class CocktailSortVisualizer : VisualizableAlgorithm {
 
             // Forward pass
             for (i in start until end) {
-                emitter.emit(AlgorithmEvent.Compare(i to i + 1))
+                emitter.emit(AlgorithmEvent.Compare(
+                    indices = i to i + 1,
+                    description = DescriptionUtils.compare(i, i + 1, arr),
+                    pseudocodeLine = 5
+                ))
                 if (arr[i] > arr[i + 1]) {
+                    val swapDesc = DescriptionUtils.swap(i, i + 1, arr)
                     arr.swapAt(i, i + 1)
-                    emitter.emit(AlgorithmEvent.Swap(i to i + 1))
+                    emitter.emit(AlgorithmEvent.Swap(
+                        indices = i to i + 1,
+                        description = swapDesc,
+                        pseudocodeLine = 6
+                    ))
                     swapped = true
                 }
             }
@@ -74,10 +84,19 @@ class CocktailSortVisualizer : VisualizableAlgorithm {
 
             // Backward pass
             for (i in (end - 1) downTo start) {
-                emitter.emit(AlgorithmEvent.Compare(i to i + 1))
+                emitter.emit(AlgorithmEvent.Compare(
+                    indices = i to i + 1,
+                    description = DescriptionUtils.compare(i, i + 1, arr),
+                    pseudocodeLine = 9
+                ))
                 if (arr[i] > arr[i + 1]) {
+                    val swapDesc2 = DescriptionUtils.swap(i, i + 1, arr)
                     arr.swapAt(i, i + 1)
-                    emitter.emit(AlgorithmEvent.Swap(i to i + 1))
+                    emitter.emit(AlgorithmEvent.Swap(
+                        indices = i to i + 1,
+                        description = swapDesc2,
+                        pseudocodeLine = 10
+                    ))
                     swapped = true
                 }
             }
@@ -85,6 +104,9 @@ class CocktailSortVisualizer : VisualizableAlgorithm {
             start++
         }
 
-        emitter.emit(AlgorithmEvent.Complete(arr.toList()))
+        emitter.emit(AlgorithmEvent.Complete(
+            result = arr.toList(),
+            description = "Cocktail sort complete! Array is now sorted."
+        ))
     }
 }

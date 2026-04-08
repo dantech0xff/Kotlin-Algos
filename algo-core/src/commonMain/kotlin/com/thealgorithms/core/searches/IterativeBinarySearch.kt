@@ -31,16 +31,33 @@ class IterativeBinarySearchVisualizer : SearchVisualizableAlgorithm {
 
         while (left <= right) {
             val mid = (left + right) ushr 1
-            emitter.emit(AlgorithmEvent.RangeCheck(left, right))
-            emitter.emit(AlgorithmEvent.Probe(mid))
+            emitter.emit(AlgorithmEvent.RangeCheck(
+                low = left,
+                high = right,
+                description = "Search range [$left..$right], mid=$mid",
+                pseudocodeLine = 4
+            ))
+            emitter.emit(AlgorithmEvent.Probe(
+                index = mid,
+                description = "Checking arr[$mid]=${input.array[mid]}, target=${input.key}",
+                pseudocodeLine = 5
+            ))
 
             when {
                 input.array[mid] == input.key -> {
-                    emitter.emit(AlgorithmEvent.Found(mid))
+                    emitter.emit(AlgorithmEvent.Found(
+                        index = mid,
+                        description = "Found target ${input.key} at index $mid!",
+                        pseudocodeLine = 6
+                    ))
                     return
                 }
-                input.array[mid] < input.key -> left = mid + 1
-                else -> right = mid - 1
+                input.array[mid] < input.key -> {
+                    left = mid + 1
+                }
+                else -> {
+                    right = mid - 1
+                }
             }
         }
 

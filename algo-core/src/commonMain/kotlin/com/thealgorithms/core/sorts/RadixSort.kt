@@ -1,5 +1,6 @@
 package com.thealgorithms.core.sorts
 
+import com.thealgorithms.core.utils.DescriptionUtils
 import com.thealgorithms.shared.AlgorithmEvent
 import com.thealgorithms.shared.VisualizableAlgorithm
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -49,7 +50,10 @@ class RadixSortVisualizer : VisualizableAlgorithm {
     override suspend fun execute(input: List<Int>, emitter: MutableSharedFlow<AlgorithmEvent>) {
         if (input.isEmpty()) {
             emitter.emit(AlgorithmEvent.Start(input))
-            emitter.emit(AlgorithmEvent.Complete(input))
+            emitter.emit(AlgorithmEvent.Complete(
+                result = input,
+                description = "Radix sort complete! Empty array."
+            ))
             return
         }
 
@@ -85,7 +89,12 @@ class RadixSortVisualizer : VisualizableAlgorithm {
             for (i in arr.indices) {
                 arr[i] = output[i]
                 emitter.emit(AlgorithmEvent.Select(i))
-                emitter.emit(AlgorithmEvent.Overwrite(i, arr[i] + min))
+                emitter.emit(AlgorithmEvent.Overwrite(
+                    index = i,
+                    newValue = arr[i] + min,
+                    description = DescriptionUtils.overwrite(i, arr[i] + min),
+                    pseudocodeLine = 5
+                ))
             }
 
             exp *= 10
@@ -95,6 +104,9 @@ class RadixSortVisualizer : VisualizableAlgorithm {
             arr[i] = arr[i] + min
         }
 
-        emitter.emit(AlgorithmEvent.Complete(arr.toList()))
+        emitter.emit(AlgorithmEvent.Complete(
+            result = arr.toList(),
+            description = "Radix sort complete! Array is now sorted."
+        ))
     }
 }

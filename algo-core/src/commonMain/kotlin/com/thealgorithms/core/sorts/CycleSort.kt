@@ -1,5 +1,6 @@
 package com.thealgorithms.core.sorts
 
+import com.thealgorithms.core.utils.DescriptionUtils
 import com.thealgorithms.core.utils.isLessThan
 import com.thealgorithms.shared.AlgorithmEvent
 import com.thealgorithms.shared.SortAlgorithm
@@ -66,7 +67,11 @@ class CycleSortVisualizer : VisualizableAlgorithm {
 
             // Find position where we put the item
             for (i in (cycleStart + 1) until n) {
-                emitter.emit(AlgorithmEvent.Compare(cycleStart to i))
+                emitter.emit(AlgorithmEvent.Compare(
+                    indices = cycleStart to i,
+                    description = "Comparing item=$item with arr[$i]=${arr[i]}",
+                    pseudocodeLine = 6
+                ))
                 if (arr[i] < item) pos++
             }
 
@@ -81,7 +86,12 @@ class CycleSortVisualizer : VisualizableAlgorithm {
 
             // Put item to its right position
             if (pos != cycleStart) {
-                emitter.emit(AlgorithmEvent.Overwrite(pos, item))
+                emitter.emit(AlgorithmEvent.Overwrite(
+                    index = pos,
+                    newValue = item,
+                    description = DescriptionUtils.overwrite(pos, item),
+                    pseudocodeLine = 8
+                ))
                 val temp = arr[pos]
                 arr[pos] = item
                 item = temp
@@ -97,7 +107,12 @@ class CycleSortVisualizer : VisualizableAlgorithm {
 
                 while (item == arr[pos]) pos++
 
-                emitter.emit(AlgorithmEvent.Overwrite(pos, item))
+                emitter.emit(AlgorithmEvent.Overwrite(
+                    index = pos,
+                    newValue = item,
+                    description = DescriptionUtils.overwrite(pos, item),
+                    pseudocodeLine = 8
+                ))
                 val temp = arr[pos]
                 arr[pos] = item
                 item = temp
@@ -106,6 +121,9 @@ class CycleSortVisualizer : VisualizableAlgorithm {
             emitter.emit(AlgorithmEvent.Deselect(cycleStart))
         }
 
-        emitter.emit(AlgorithmEvent.Complete(arr.toList()))
+        emitter.emit(AlgorithmEvent.Complete(
+            result = arr.toList(),
+            description = "Cycle sort complete! Array is now sorted."
+        ))
     }
 }

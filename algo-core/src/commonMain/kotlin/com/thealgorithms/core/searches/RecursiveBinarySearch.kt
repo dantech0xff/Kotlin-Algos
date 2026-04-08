@@ -40,11 +40,24 @@ class RecursiveBinarySearchVisualizer : SearchVisualizableAlgorithm {
             return
         }
         val mid = (left + right) ushr 1
-        emitter.emit(AlgorithmEvent.RangeCheck(left, right))
-        emitter.emit(AlgorithmEvent.Probe(mid))
+        emitter.emit(AlgorithmEvent.RangeCheck(
+            low = left,
+            high = right,
+            description = "Search range [$left..$right], mid=$mid",
+            pseudocodeLine = 4
+        ))
+        emitter.emit(AlgorithmEvent.Probe(
+            index = mid,
+            description = "Checking arr[$mid]=${array[mid]}, target=$key",
+            pseudocodeLine = 5
+        ))
 
         when {
-            array[mid] == key -> emitter.emit(AlgorithmEvent.Found(mid))
+            array[mid] == key -> emitter.emit(AlgorithmEvent.Found(
+                index = mid,
+                description = "Found target $key at index $mid!",
+                pseudocodeLine = 6
+            ))
             array[mid] > key -> search(array, key, left, mid - 1, emitter)
             else -> search(array, key, mid + 1, right, emitter)
         }

@@ -1,5 +1,6 @@
 package com.thealgorithms.core.sorts
 
+import com.thealgorithms.core.utils.DescriptionUtils
 import com.thealgorithms.core.utils.isGreaterThan
 import com.thealgorithms.core.utils.swapAt
 import com.thealgorithms.shared.AlgorithmEvent
@@ -54,12 +55,19 @@ class HeapSortVisualizer : VisualizableAlgorithm {
 
         // Extract elements from heap one by one
         for (i in (n - 1) downTo 1) {
-            emitter.emit(AlgorithmEvent.Swap(0 to i))
+            emitter.emit(AlgorithmEvent.Swap(
+                indices = 0 to i,
+                description = DescriptionUtils.swap(0, i, arr),
+                pseudocodeLine = 4
+            ))
             arr.swapAt(0, i)
             heapify(arr, i, 0, emitter)
         }
 
-        emitter.emit(AlgorithmEvent.Complete(arr.toList()))
+        emitter.emit(AlgorithmEvent.Complete(
+            result = arr.toList(),
+            description = "Heap sort complete! Array is now sorted."
+        ))
     }
 
     private suspend fun heapify(
@@ -73,16 +81,28 @@ class HeapSortVisualizer : VisualizableAlgorithm {
         val right = 2 * i + 2
 
         if (left < n) {
-            emitter.emit(AlgorithmEvent.Compare(left to largest))
+            emitter.emit(AlgorithmEvent.Compare(
+                indices = left to largest,
+                description = DescriptionUtils.compare(left, largest, arr),
+                pseudocodeLine = 5
+            ))
             if (arr[left] > arr[largest]) largest = left
         }
         if (right < n) {
-            emitter.emit(AlgorithmEvent.Compare(right to largest))
+            emitter.emit(AlgorithmEvent.Compare(
+                indices = right to largest,
+                description = DescriptionUtils.compare(right, largest, arr),
+                pseudocodeLine = 5
+            ))
             if (arr[right] > arr[largest]) largest = right
         }
 
         if (largest != i) {
-            emitter.emit(AlgorithmEvent.Swap(i to largest))
+            emitter.emit(AlgorithmEvent.Swap(
+                indices = i to largest,
+                description = DescriptionUtils.swap(i, largest, arr),
+                pseudocodeLine = 5
+            ))
             arr.swapAt(i, largest)
             heapify(arr, n, largest, emitter)
         }

@@ -12,13 +12,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.thealgorithms.ui.components.InfoPanel
 import com.thealgorithms.ui.components.InputConfigPanel
+import com.thealgorithms.ui.components.LegendPanel
 import com.thealgorithms.ui.components.NavigationPanel
 import com.thealgorithms.ui.components.PlaybackControls
 import com.thealgorithms.ui.components.SearchVisualization
@@ -37,13 +40,17 @@ fun AppContent(
     val snapshot by viewModel.snapshot.collectAsState()
 
     Row(modifier = Modifier.fillMaxSize()) {
+        // Left: Navigation (200dp)
         NavigationPanel(
             selectedAlgorithm = selectedAlgo,
             onAlgorithmSelected = { viewModel.selectAlgorithm(it) },
-            modifier = Modifier.width(240.dp).fillMaxHeight()
+            modifier = Modifier.width(200.dp).fillMaxHeight()
         )
 
-        Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+        // Center: Main visualization area (fills remaining space)
+        Column(
+            modifier = Modifier.weight(1f).fillMaxHeight().padding(16.dp)
+        ) {
             StatsPanel(
                 algorithmName = selectedAlgo?.name ?: "Select an algorithm",
                 algorithmDescription = selectedAlgo?.description,
@@ -74,6 +81,11 @@ fun AppContent(
 
             Spacer(Modifier.height(8.dp))
 
+            // Legend below visualization
+            LegendPanel(modifier = Modifier.fillMaxWidth())
+
+            Spacer(Modifier.height(8.dp))
+
             PlaybackControls(
                 playbackState = playbackState,
                 progress = viewModel.progress.collectAsState().value,
@@ -85,6 +97,7 @@ fun AppContent(
                 onStepBack = { viewModel.stepBack() },
                 onSpeedChange = { viewModel.setSpeed(it) },
                 onRun = { viewModel.runAlgorithm() },
+                onSeek = { viewModel.seekTo(it) },
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -97,6 +110,21 @@ fun AppContent(
                 onInputChange = { viewModel.setInputArray(it) },
                 onSearchKeyChange = { viewModel.setSearchKey(it) },
                 modifier = Modifier.fillMaxWidth()
+            )
+        }
+
+        // Right: Info panel (280dp, conditional)
+        if (selectedAlgo != null) {
+            VerticalDivider(
+                modifier = Modifier.fillMaxHeight().width(1.dp),
+                color = MaterialTheme.colorScheme.outlineVariant
+            )
+            InfoPanel(
+                algorithmInfo = selectedAlgo,
+                snapshot = snapshot,
+                playbackState = playbackState,
+                progress = viewModel.progress.collectAsState().value,
+                modifier = Modifier.width(280.dp).fillMaxHeight()
             )
         }
     }

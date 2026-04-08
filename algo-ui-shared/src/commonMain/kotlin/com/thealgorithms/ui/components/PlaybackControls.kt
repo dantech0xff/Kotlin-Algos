@@ -18,6 +18,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -28,6 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.thealgorithms.shared.PlaybackState
+import com.thealgorithms.ui.theme.VizColors
 
 @Composable
 fun PlaybackControls(
@@ -41,6 +43,7 @@ fun PlaybackControls(
     onStepBack: () -> Unit,
     onSpeedChange: (Long) -> Unit,
     onRun: () -> Unit,
+    onSeek: (Int) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier.padding(vertical = 4.dp)) {
@@ -109,6 +112,21 @@ fun PlaybackControls(
             )
         }
 
+        // Progress scrubber
+        if (progress.second > 0) {
+            Slider(
+                value = progress.first.toFloat(),
+                onValueChange = { onSeek(it.toInt()) },
+                valueRange = 0f..maxOf(1f, progress.second.toFloat()),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                colors = SliderDefaults.colors(
+                    inactiveTrackColor = VizColors.progressTrack,
+                    activeTrackColor = VizColors.textAccent,
+                    thumbColor = VizColors.textAccent,
+                )
+            )
+        }
+
         Row(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically
@@ -128,6 +146,14 @@ fun PlaybackControls(
                 modifier = Modifier.width(60.dp)
             )
         }
+
+        // Keyboard shortcut hints
+        Text(
+            text = "Space=Play  ←→=Step  R=Reset",
+            style = MaterialTheme.typography.labelSmall,
+            color = VizColors.textMuted,
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 2.dp)
+        )
     }
 }
 

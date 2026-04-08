@@ -22,6 +22,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.thealgorithms.shared.PlaybackState
+import com.thealgorithms.ui.theme.VizColors
 import com.thealgorithms.viz.AlgorithmSnapshot
 
 @Composable
@@ -39,7 +40,7 @@ fun StatsPanel(
         modifier = modifier,
         tonalElevation = 2.dp,
         shape = RoundedCornerShape(12.dp),
-        color = Color(0xFF1E1E2E)
+        color = VizColors.surfaceDark
     ) {
         Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
             // Row 1: Algorithm name + state badge
@@ -52,7 +53,7 @@ fun StatsPanel(
                     text = algorithmName,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFFF8F8F2)
+                    color = VizColors.textPrimary
                 )
                 StateBadge(playbackState)
             }
@@ -63,7 +64,7 @@ fun StatsPanel(
                 Text(
                     text = algorithmDescription,
                     style = MaterialTheme.typography.bodySmall,
-                    color = Color(0xFF8888A8),
+                    color = VizColors.textMuted,
                     fontFamily = FontFamily.Monospace
                 )
             }
@@ -75,9 +76,9 @@ fun StatsPanel(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                StatChip("Comparisons", snapshot.comparisons.toString(), Color(0xFF60A5FA))
-                StatChip("Swaps", snapshot.swaps.toString(), Color(0xFFF472B6))
-                StatChip("Elements", snapshot.arrayState.size.toString(), Color(0xFF34D399))
+                StatChip("Comparisons", snapshot.comparisons.toString(), VizColors.chipComparisons)
+                StatChip("Swaps", snapshot.swaps.toString(), VizColors.chipSwaps)
+                StatChip("Elements", snapshot.arrayState.size.toString(), VizColors.chipElements)
             }
 
             Spacer(Modifier.height(8.dp))
@@ -88,13 +89,13 @@ fun StatsPanel(
                 progress = { progressFraction },
                 modifier = Modifier.fillMaxWidth().height(6.dp),
                 color = MaterialTheme.colorScheme.primary,
-                trackColor = Color(0xFF33334A),
+                trackColor = VizColors.progressTrack,
             )
             Spacer(Modifier.height(4.dp))
             Text(
                 text = "Event $currentEvent / $totalEvents",
                 style = MaterialTheme.typography.labelSmall,
-                color = Color(0xFF8888A8)
+                color = VizColors.textMuted
             )
         }
     }
@@ -103,10 +104,10 @@ fun StatsPanel(
 @Composable
 private fun StateBadge(state: PlaybackState) {
     val (label, bgColor, textColor) = when (state) {
-        is PlaybackState.Playing -> Triple("Playing", Color(0xFF22C55E).copy(alpha = 0.2f), Color(0xFF22C55E))
-        is PlaybackState.Paused -> Triple("Paused", Color(0xFFFFD93D).copy(alpha = 0.2f), Color(0xFFFFD93D))
-        is PlaybackState.Complete -> Triple("Complete", Color(0xFF60A5FA).copy(alpha = 0.2f), Color(0xFF60A5FA))
-        else -> Triple("Stopped", Color.Gray.copy(alpha = 0.2f), Color.Gray)
+        is PlaybackState.Playing -> Triple("Playing", VizColors.sorted.copy(alpha = 0.2f), VizColors.sorted)
+        is PlaybackState.Paused -> Triple("Paused", VizColors.comparing.copy(alpha = 0.2f), VizColors.comparing)
+        is PlaybackState.Complete -> Triple("Complete", VizColors.selecting.copy(alpha = 0.2f), VizColors.selecting)
+        else -> Triple("Stopped", VizColors.textMuted.copy(alpha = 0.2f), VizColors.textMuted)
     }
     Surface(
         shape = RoundedCornerShape(12.dp),
@@ -142,7 +143,7 @@ private fun StatChip(label: String, value: String, accentColor: Color) {
         Text(
             text = label,
             style = MaterialTheme.typography.labelSmall,
-            color = Color(0xFFAAAACC)
+            color = VizColors.textMuted
         )
     }
 }

@@ -7,6 +7,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.padding
@@ -27,20 +28,10 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.thealgorithms.shared.HighlightReason
+import com.thealgorithms.ui.theme.VizColors
 import com.thealgorithms.viz.AlgorithmSnapshot
-
-// ── Color palette ──────────────────────────────────────────────────────────
-private val PROBE_COLOR = Color(0xFFFFD93D)       // yellow – PROBING / COMPARING
-private val FOUND_COLOR = Color(0xFF22C55E)        // green – FOUND
-private val RANGE_COLOR = Color(0xFF818CF8)        // indigo – RANGE
-private val SORTED_COLOR = Color(0xFF34D399)       // emerald – SORTED
-private val PIVOT_COLOR = Color(0xFFF472B6)        // pink – PIVOTING
-private val SWAP_COLOR = Color(0xFFFB923C)         // orange – SWAPPING
-private val DEFAULT_BG = Color(0xFF2D2D44)         // dark surface
-private val DEFAULT_BORDER = Color(0xFF4A4A6A)     // muted border
-private val GRID_BG = Color(0xFF1E1E32)            // container background
-private val SEARCH_KEY_DOT = Color(0xFF38BDF8)     // sky-blue dot
 
 // ── Public composable ──────────────────────────────────────────────────────
 
@@ -56,7 +47,7 @@ fun SearchVisualization(
 
     Box(
         modifier = modifier
-            .background(GRID_BG, MaterialTheme.shapes.large)
+            .background(VizColors.gridDark, MaterialTheme.shapes.large)
             .padding(12.dp)
     ) {
         LazyVerticalGrid(
@@ -75,6 +66,7 @@ fun SearchVisualization(
 
                 SearchCell(
                     value = value,
+                    index = index,
                     reason = reason,
                     isProbed = isProbed,
                     isFound = isFound,
@@ -90,6 +82,7 @@ fun SearchVisualization(
 @Composable
 private fun SearchCell(
     value: Int,
+    index: Int,
     reason: HighlightReason?,
     isProbed: Boolean,
     isFound: Boolean,
@@ -108,7 +101,7 @@ private fun SearchCell(
     val borderColor = cellBorder(reason)
     val borderWid = if (isFound) 2.5.dp else 1.dp
     val valueWeight = if (reason != null) FontWeight.Bold else FontWeight.Medium
-    val valueColor = if (reason != null) Color.White else Color(0xFFB0B0CC)
+    val valueColor = if (reason != null) Color.White else VizColors.textMuted
 
     Box(
         modifier = Modifier.graphicsLayer {
@@ -124,7 +117,7 @@ private fun SearchCell(
                     .matchParentSize()
                     .drawBehind {
                         drawCircle(
-                            color = FOUND_COLOR.copy(alpha = 0.25f),
+                            color = VizColors.found.copy(alpha = 0.25f),
                             radius = size.minDimension * 0.7f
                         )
                     }
@@ -139,27 +132,40 @@ private fun SearchCell(
                 .padding(horizontal = 6.dp, vertical = 4.dp),
             contentAlignment = Alignment.Center
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
             ) {
-                Text(
-                    text = value.toString(),
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = valueWeight,
-                    color = valueColor,
-                    textAlign = TextAlign.Center
-                )
-
-                // Small dot indicating this cell's value matches the search key
-                if (showKeyDot) {
-                    Box(
-                        modifier = Modifier
-                            .padding(start = 4.dp)
-                            .size(6.dp)
-                            .background(SEARCH_KEY_DOT, CircleShape)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = value.toString(),
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = valueWeight,
+                        color = valueColor,
+                        textAlign = TextAlign.Center
                     )
+
+                    // Small dot indicating this cell's value matches the search key
+                    if (showKeyDot) {
+                        Box(
+                            modifier = Modifier
+                                .padding(start = 4.dp)
+                                .size(6.dp)
+                                .background(VizColors.keyDot, CircleShape)
+                        )
+                    }
                 }
+
+                // Index label
+                Text(
+                    text = "#$index",
+                    style = MaterialTheme.typography.labelSmall,
+                    fontSize = 9.sp,
+                    color = VizColors.textMuted.copy(alpha = 0.6f),
+                )
             }
         }
     }
@@ -169,26 +175,26 @@ private fun SearchCell(
 
 private fun cellBackground(reason: HighlightReason?): Color = when (reason) {
     HighlightReason.PROBING,
-    HighlightReason.COMPARING -> PROBE_COLOR
-    HighlightReason.FOUND     -> FOUND_COLOR
-    HighlightReason.RANGE     -> RANGE_COLOR
-    HighlightReason.SORTED    -> SORTED_COLOR
-    HighlightReason.PIVOTING  -> PIVOT_COLOR
-    HighlightReason.SWAPPING  -> SWAP_COLOR
-    HighlightReason.SELECTING -> PROBE_COLOR
-    HighlightReason.OVERWRITING -> SWAP_COLOR
-    null                      -> DEFAULT_BG
+    HighlightReason.COMPARING -> VizColors.probing
+    HighlightReason.FOUND     -> VizColors.found
+    HighlightReason.RANGE     -> VizColors.rangeHighlight
+    HighlightReason.SORTED    -> VizColors.sorted
+    HighlightReason.PIVOTING  -> VizColors.pivoting
+    HighlightReason.SWAPPING  -> VizColors.swapping
+    HighlightReason.SELECTING -> VizColors.selecting
+    HighlightReason.OVERWRITING -> VizColors.overwriting
+    null                      -> VizColors.cellDefault
 }
 
 private fun cellBorder(reason: HighlightReason?): Color = when (reason) {
     HighlightReason.PROBING,
-    HighlightReason.COMPARING -> PROBE_COLOR.copy(alpha = 0.7f)
-    HighlightReason.FOUND     -> FOUND_COLOR
-    HighlightReason.RANGE     -> RANGE_COLOR.copy(alpha = 0.7f)
-    HighlightReason.SORTED    -> SORTED_COLOR.copy(alpha = 0.5f)
-    HighlightReason.PIVOTING  -> PIVOT_COLOR.copy(alpha = 0.6f)
-    HighlightReason.SWAPPING  -> SWAP_COLOR.copy(alpha = 0.6f)
-    HighlightReason.SELECTING -> PROBE_COLOR.copy(alpha = 0.5f)
-    HighlightReason.OVERWRITING -> SWAP_COLOR.copy(alpha = 0.5f)
-    null                      -> DEFAULT_BORDER
+    HighlightReason.COMPARING -> VizColors.probing.copy(alpha = 0.7f)
+    HighlightReason.FOUND     -> VizColors.found
+    HighlightReason.RANGE     -> VizColors.rangeHighlight.copy(alpha = 0.7f)
+    HighlightReason.SORTED    -> VizColors.sorted.copy(alpha = 0.5f)
+    HighlightReason.PIVOTING  -> VizColors.pivoting.copy(alpha = 0.6f)
+    HighlightReason.SWAPPING  -> VizColors.swapping.copy(alpha = 0.6f)
+    HighlightReason.SELECTING -> VizColors.selecting.copy(alpha = 0.5f)
+    HighlightReason.OVERWRITING -> VizColors.overwriting.copy(alpha = 0.5f)
+    null                      -> VizColors.cellBorder
 }

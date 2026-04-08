@@ -1,5 +1,6 @@
 package com.thealgorithms.core.sorts
 
+import com.thealgorithms.core.utils.DescriptionUtils
 import com.thealgorithms.shared.AlgorithmEvent
 import com.thealgorithms.shared.VisualizableAlgorithm
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -41,7 +42,10 @@ class CountingSortVisualizer : VisualizableAlgorithm {
     override suspend fun execute(input: List<Int>, emitter: MutableSharedFlow<AlgorithmEvent>) {
         if (input.isEmpty()) {
             emitter.emit(AlgorithmEvent.Start(input))
-            emitter.emit(AlgorithmEvent.Complete(input))
+            emitter.emit(AlgorithmEvent.Complete(
+                result = input,
+                description = "Counting sort complete! Empty array."
+            ))
             return
         }
 
@@ -63,12 +67,20 @@ class CountingSortVisualizer : VisualizableAlgorithm {
             repeat(count[i]) {
                 val value = i + min
                 emitter.emit(AlgorithmEvent.Select(index))
-                emitter.emit(AlgorithmEvent.Overwrite(index, value))
+                emitter.emit(AlgorithmEvent.Overwrite(
+                    index = index,
+                    newValue = value,
+                    description = DescriptionUtils.overwrite(index, value),
+                    pseudocodeLine = 9
+                ))
                 arr[index] = value
                 index++
             }
         }
 
-        emitter.emit(AlgorithmEvent.Complete(arr.toList()))
+        emitter.emit(AlgorithmEvent.Complete(
+            result = arr.toList(),
+            description = "Counting sort complete! Array is now sorted."
+        ))
     }
 }

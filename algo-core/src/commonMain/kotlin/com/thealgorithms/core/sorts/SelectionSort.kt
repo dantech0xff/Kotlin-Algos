@@ -1,5 +1,6 @@
 package com.thealgorithms.core.sorts
 
+import com.thealgorithms.core.utils.DescriptionUtils
 import com.thealgorithms.core.utils.isLessThan
 import com.thealgorithms.core.utils.swapAt
 import com.thealgorithms.shared.AlgorithmEvent
@@ -39,7 +40,11 @@ class SelectionSortVisualizer : VisualizableAlgorithm {
             var minIndex = i
             emitter.emit(AlgorithmEvent.Select(i))
             for (j in i + 1 until arr.size) {
-                emitter.emit(AlgorithmEvent.Compare(j to minIndex))
+                emitter.emit(AlgorithmEvent.Compare(
+                    indices = j to minIndex,
+                    description = DescriptionUtils.compare(j, minIndex, arr),
+                    pseudocodeLine = 5
+                ))
                 if (arr[j] < arr[minIndex]) {
                     emitter.emit(AlgorithmEvent.Deselect(minIndex))
                     minIndex = j
@@ -47,12 +52,20 @@ class SelectionSortVisualizer : VisualizableAlgorithm {
                 }
             }
             if (i != minIndex) {
+                val swapDesc = DescriptionUtils.swap(i, minIndex, arr)
                 arr.swapAt(i, minIndex)
-                emitter.emit(AlgorithmEvent.Swap(i to minIndex))
+                emitter.emit(AlgorithmEvent.Swap(
+                    indices = i to minIndex,
+                    description = swapDesc,
+                    pseudocodeLine = 7
+                ))
             }
             emitter.emit(AlgorithmEvent.Deselect(minIndex))
         }
 
-        emitter.emit(AlgorithmEvent.Complete(arr.toList()))
+        emitter.emit(AlgorithmEvent.Complete(
+            result = arr.toList(),
+            description = "Selection sort complete! Array is now sorted."
+        ))
     }
 }

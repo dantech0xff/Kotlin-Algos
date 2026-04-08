@@ -16,13 +16,11 @@ class SearchVisualizationTest : FunSpec({
         val events = emitter.replayCache
 
         events.filterIsInstance<AlgorithmEvent.Start>().size shouldBe 1
-        events.filterIsInstance<AlgorithmEvent.Probe>() shouldBe
-            listOf(
-                AlgorithmEvent.Probe(0),
-                AlgorithmEvent.Probe(1),
-                AlgorithmEvent.Probe(2),
-            )
-        events.last() shouldBe AlgorithmEvent.Found(2)
+        val probes = events.filterIsInstance<AlgorithmEvent.Probe>()
+        probes.map { it.index } shouldBe listOf(0, 1, 2)
+        probes.all { it.description.isNotEmpty() } shouldBe true
+        val found = events.last()
+        found shouldBe AlgorithmEvent.Found(2, description = (found as AlgorithmEvent.Found).description, pseudocodeLine = (found as AlgorithmEvent.Found).pseudocodeLine)
     }
 
     test("LinearSearch emits NotFound when key absent") {
@@ -44,7 +42,9 @@ class SearchVisualizationTest : FunSpec({
         rangeChecks.shouldNotBeEmpty()
         rangeChecks.first().low shouldBe 0
         rangeChecks.first().high shouldBe 9
-        events.last() shouldBe AlgorithmEvent.Found(6)
+        val found = events.filterIsInstance<AlgorithmEvent.Found>().last()
+        found.index shouldBe 6
+        found.description.isNotEmpty() shouldBe true
     }
 
     test("IterativeBinarySearch emits NotFound when key absent") {
@@ -64,7 +64,9 @@ class SearchVisualizationTest : FunSpec({
 
         val rangeChecks = events.filterIsInstance<AlgorithmEvent.RangeCheck>()
         rangeChecks.shouldNotBeEmpty()
-        events.last() shouldBe AlgorithmEvent.Found(3)
+        val found = events.filterIsInstance<AlgorithmEvent.Found>().last()
+        found.index shouldBe 3
+        found.description.isNotEmpty() shouldBe true
     }
 
     test("RecursiveBinarySearch emits NotFound when key absent") {
