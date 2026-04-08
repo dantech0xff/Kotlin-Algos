@@ -34,6 +34,7 @@ fun ComparePanel(
 ) {
     val slots by viewModel.slots.collectAsState()
     val isPlaying by viewModel.isPlaying.collectAsState()
+    val isRunning by viewModel.isRunning.collectAsState()
     val speedMs by viewModel.speedMs.collectAsState()
     val inputArray by viewModel.inputArray.collectAsState()
 
@@ -44,9 +45,9 @@ fun ComparePanel(
 
     val playbackState: PlaybackState = when {
         isPlaying -> PlaybackState.Playing
+        isRunning -> PlaybackState.Playing  // Show as "running" during algorithm execution
         slots.isNotEmpty() && slots.all { it.isComplete } -> PlaybackState.Complete(maxTotal)
-        maxTotal > 0 && minIndex == 0 -> PlaybackState.Paused  // Events loaded, ready to play
-        minIndex > 0 -> PlaybackState.Paused
+        maxTotal > 0 -> PlaybackState.Paused  // Events loaded → enable Play
         else -> PlaybackState.Stopped
     }
 
