@@ -42,14 +42,12 @@ fun ComparePanel(
     val maxTotal = slots.maxOfOrNull { it.totalEvents } ?: 0
     val progress = minIndex to maxTotal
 
-    val playbackState: PlaybackState = if (isPlaying) {
-        PlaybackState.Playing
-    } else if (slots.isNotEmpty() && slots.all { it.isComplete }) {
-        PlaybackState.Complete(maxTotal)
-    } else if (minIndex > 0) {
-        PlaybackState.Paused
-    } else {
-        PlaybackState.Stopped
+    val playbackState: PlaybackState = when {
+        isPlaying -> PlaybackState.Playing
+        slots.isNotEmpty() && slots.all { it.isComplete } -> PlaybackState.Complete(maxTotal)
+        maxTotal > 0 && minIndex == 0 -> PlaybackState.Paused  // Events loaded, ready to play
+        minIndex > 0 -> PlaybackState.Paused
+        else -> PlaybackState.Stopped
     }
 
     Column(modifier = modifier.padding(8.dp)) {

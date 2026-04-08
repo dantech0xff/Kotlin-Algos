@@ -60,6 +60,7 @@ class CompareViewModel {
         playbackJob?.cancel()
         _isPlaying.value = false
 
+        // Run all 4 algorithms and update slots
         scope.launch {
             algorithms.mapIndexed { i, algo ->
                 launch {
@@ -71,12 +72,18 @@ class CompareViewModel {
             }.joinAll()
 
             updateSlots()
+
+            // Auto-play after run so user sees immediate results
+            play()
         }
     }
 
     fun play() {
-        if (_slots.value.isEmpty()) return
-        if (_slots.value.all { it.isComplete }) return
+        // Check if any player has events to play
+        val hasEvents = players.any { it.totalEvents.value > 0 }
+        if (!hasEvents) return
+        val allDone = players.all { it.state.value is PlaybackState.Complete }
+        if (allDone) return
 
         _isPlaying.value = true
         playbackJob?.cancel()
@@ -84,7 +91,7 @@ class CompareViewModel {
             while (true) {
                 var anyAdvanced = false
                 players.forEachIndexed { i, player ->
-                    if (player.state.value !is PlaybackState.Complete) {
+                    if (player.state.value !is PlaybackState.Complete && player.totalEvents.value > 0) {
                         player.stepForward()
                         anyAdvanced = true
                     }
@@ -140,10 +147,21 @@ class CompareViewModel {
         if (algos.size != 4) return
 
         _slots.value = algos.mapIndexed { i, algo ->
+            val playerState = players[i].state.value
+            // Consider complete if player says so OR if we've stepped through all events
+            val effectiveState = if (playerState is PlaybackState.Complete) {
+                playerState
+            } else if (players[i].totalEvents.value > 0 &&
+                       players[i].currentEventIndex.value >= players[i].totalEvents.value - 1) {
+                PlaybackState.Complete(players[i].totalEvents.value)
+            } else {
+                playerState
+            }
+
             CompareSlotState(
                 algorithm = algo,
                 snapshot = players[i].currentSnapshot.value,
-                playbackState = players[i].state.value,
+                playbackState = effectiveState,
                 eventIndex = players[i].currentEventIndex.value,
                 totalEvents = players[i].totalEvents.value,
             )
