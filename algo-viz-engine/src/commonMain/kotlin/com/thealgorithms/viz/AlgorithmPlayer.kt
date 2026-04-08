@@ -87,6 +87,13 @@ class AlgorithmPlayer(
         processCapturedEvents(emitter.recorded)
     }
 
+    suspend fun runAndPrepare(algorithm: VisualizableAlgorithm, input: List<Int>) {
+        run(algorithm, input)
+        if (buffer.size > 0) {
+            _state.value = PlaybackState.Paused
+        }
+    }
+
     private fun processCapturedEvents(events: List<AlgorithmEvent>) {
         for (event in events) {
             buffer.add(event)
@@ -151,6 +158,8 @@ class AlgorithmPlayer(
 
             if (_currentEventIndex.value >= buffer.size - 1) {
                 _state.value = PlaybackState.Complete(buffer.size)
+            } else {
+                _state.value = PlaybackState.Paused
             }
         }
     }
