@@ -43,6 +43,14 @@ object VizColors {
     val pseudocodeActiveLine = Color(0xFF2A2A40)
     val pseudocodeLineNumber = Color(0xFF6A6A8A)
 
+    // Compare mode
+    val compareSlotColors = listOf(
+        Color(0xFF60A5FA), // blue
+        Color(0xFFA855F7), // purple
+        Color(0xFF22C55E), // green
+        Color(0xFFF97316), // orange
+    )
+
     // Misc
     val progressTrack = Color(0xFF33334A)
     val divider = Color(0xFF33334A)

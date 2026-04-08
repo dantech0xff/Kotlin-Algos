@@ -68,14 +68,14 @@ private fun barColorFor(
 // ── Main composable ─────────────────────────────────────────────────
 
 @Composable
-fun SortVisualization(snapshot: AlgorithmSnapshot, modifier: Modifier = Modifier) {
+fun SortVisualization(snapshot: AlgorithmSnapshot, modifier: Modifier = Modifier, compact: Boolean = false) {
     val animMap = remember {
         mutableStateMapOf<Int, Animatable<Float, AnimationVector1D>>()
     }
     val textMeasurer = rememberTextMeasurer()
 
     val maxVal = snapshot.arrayState.maxOrNull()?.toFloat()?.coerceAtLeast(1f) ?: 1f
-    val showLabels = snapshot.arrayState.size in 1..25
+    val showLabels = !compact && snapshot.arrayState.size in 1..25
 
     // Detect completion: all elements sorted
     val isComplete = snapshot.arrayState.isNotEmpty() &&
@@ -114,24 +114,28 @@ fun SortVisualization(snapshot: AlgorithmSnapshot, modifier: Modifier = Modifier
         drawRect(VizColors.canvasDark)
 
         // Subtle horizontal grid lines
-        for (i in 1..4) {
-            val y = size.height * i / 5f
-            drawLine(
-                color = VizColors.textPrimary.copy(alpha = 0.08f),
-                start = Offset(0f, y),
-                end = Offset(size.width, y),
-                strokeWidth = 1f,
-            )
+        if (!compact) {
+            for (i in 1..4) {
+                val y = size.height * i / 5f
+                drawLine(
+                    color = VizColors.textPrimary.copy(alpha = 0.08f),
+                    start = Offset(0f, y),
+                    end = Offset(size.width, y),
+                    strokeWidth = 1f,
+                )
+            }
         }
 
         val count = snapshot.arrayState.size
         val barWidth = size.width / count
         val gap = when {
+            compact -> 1f
             count > 50 -> 1f
             count > 25 -> 2f
             else -> 3f
         }
         val radius = when {
+            compact -> 2f
             count > 50 -> 0f
             count > 25 -> 2f
             else -> 6f

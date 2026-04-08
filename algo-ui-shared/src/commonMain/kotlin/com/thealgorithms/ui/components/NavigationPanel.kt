@@ -49,7 +49,9 @@ import com.thealgorithms.ui.theme.VizColors
 fun NavigationPanel(
     selectedAlgorithm: AlgorithmInfo?,
     onAlgorithmSelected: (AlgorithmInfo) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onCompareClicked: () -> Unit = {},
+    isCompareMode: Boolean = false
 ) {
     var filterText by remember { mutableStateOf("") }
 
@@ -61,6 +63,26 @@ fun NavigationPanel(
             color = VizColors.textPrimary,
             modifier = Modifier.padding(16.dp)
         )
+
+        // Compare mode button
+        Surface(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp)
+                .clickable(onClick = onCompareClicked),
+            shape = RoundedCornerShape(6.dp),
+            color = if (isCompareMode) VizColors.textAccent else VizColors.sidebarSelectedBg
+        ) {
+            Box(
+                modifier = Modifier.fillMaxWidth().height(32.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "⚡ Compare",
+                    color = VizColors.textPrimary,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
 
         // Search filter
         OutlinedTextField(
@@ -189,7 +211,7 @@ private fun AlgorithmItem(
                 text = info.name,
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
-                color = if (isSelected) Color.White else VizColors.textPrimary.copy(alpha = 0.85f)
+                color = if (isSelected) VizColors.textPrimary else VizColors.textPrimary.copy(alpha = 0.85f)
             )
             Text(
                 text = info.description,
